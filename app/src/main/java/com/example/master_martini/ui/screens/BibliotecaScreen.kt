@@ -1,11 +1,16 @@
 package com.example.master_martini.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.AccessTime
+import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material.icons.rounded.SignalCellularAlt
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -23,7 +28,6 @@ fun BibliotecaScreen(onVolverClick: () -> Unit = {}) {
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFFAF7F0))
-            // ELIMINAMOS el statusBarsPadding()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp, vertical = 18.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)
@@ -49,7 +53,6 @@ fun BibliotecaScreen(onVolverClick: () -> Unit = {}) {
             duracion = "8 min",
             nivel = "Básico"
         )
-
     }
 }
 
@@ -60,7 +63,9 @@ fun VideoCardPro(titulo: String, descripcion: String, duracion: String, nivel: S
         shape = RoundedCornerShape(20.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(6.dp, RoundedCornerShape(20.dp))
+            .shadow(4.dp, RoundedCornerShape(20.dp))
+            .clip(RoundedCornerShape(20.dp))
+            .clickable {  }
     ) {
         Column {
 
@@ -72,14 +77,19 @@ fun VideoCardPro(titulo: String, descripcion: String, duracion: String, nivel: S
                 contentAlignment = Alignment.Center
             ) {
 
-                Box(
-                    modifier = Modifier
-                        .size(60.dp)
-                        .clip(CircleShape)
-                        .background(Color(0xFFD9AD50).copy(alpha = 0.9f)),
-                    contentAlignment = Alignment.Center
+                Surface(
+                    shape = CircleShape,
+                    color = Color(0xFFD9AD50).copy(alpha = 0.95f),
+                    modifier = Modifier.size(56.dp)
                 ) {
-                    Text("▶", fontSize = 24.sp, color = Color.White)
+                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                        Icon(
+                            imageVector = Icons.Rounded.PlayArrow,
+                            contentDescription = "Reproducir $titulo",
+                            tint = Color.White,
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
                 }
             }
 
@@ -101,32 +111,54 @@ fun VideoCardPro(titulo: String, descripcion: String, duracion: String, nivel: S
                     lineHeight = 20.sp
                 )
 
-
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+
                     Surface(
                         color = Color(0xFFF4F5F0),
                         shape = RoundedCornerShape(8.dp)
                     ) {
-                        Text(
-                            text = "⏱ $duracion",
+                        Row(
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = Color(0xFF244D3B)
-                        )
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.AccessTime,
+                                contentDescription = "Duración",
+                                tint = Color(0xFF244D3B),
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Text(
+                                text = duracion,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color(0xFF244D3B)
+                            )
+                        }
                     }
 
                     Surface(
                         color = Color(0xFFFFF7E6),
                         shape = RoundedCornerShape(8.dp)
                     ) {
-                        Text(
-                            text = "📊 $nivel",
+                        Row(
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = Color(0xFFD9AD50)
-                        )
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.SignalCellularAlt,
+                                contentDescription = "Nivel",
+                                tint = Color(0xFFD9AD50),
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Text(
+                                text = nivel,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color(0xFFD9AD50)
+                            )
+                        }
                     }
                 }
             }

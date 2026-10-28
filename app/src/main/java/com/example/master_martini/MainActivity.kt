@@ -9,6 +9,12 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.FavoriteBorder
+import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.rounded.VideoLibrary
+import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -19,9 +25,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.dp
 import com.example.master_martini.ui.screens.BibliotecaScreen
 import com.example.master_martini.ui.screens.FavoritosScreen
 import com.example.master_martini.ui.screens.HomeScreen
@@ -54,7 +60,10 @@ class MainActivity : ComponentActivity() {
                     containerColor = Color(0xFFFAF7F0),
                     bottomBar = {
                         if (pantallaActual != "registro") {
-                            NavigationBar(containerColor = Color.White) {
+                            NavigationBar(
+                                containerColor = Color.White,
+                                modifier = Modifier.shadow(16.dp)
+                            ) {
                                 val coloresPro = NavigationBarItemDefaults.colors(
                                     selectedIconColor = Color(0xFF18372B),
                                     selectedTextColor = Color(0xFF18372B),
@@ -66,28 +75,48 @@ class MainActivity : ComponentActivity() {
                                 NavigationBarItem(
                                     selected = pantallaActual == "home",
                                     onClick = { pantallaActual = "home" },
-                                    icon = { Text("⌂", fontSize = 24.sp) },
+                                    icon = {
+                                        Icon(
+                                            imageVector = Icons.Rounded.Home,
+                                            contentDescription = "Inicio"
+                                        )
+                                    },
                                     label = { Text("Inicio") },
                                     colors = coloresPro
                                 )
                                 NavigationBarItem(
                                     selected = pantallaActual == "biblioteca",
                                     onClick = { pantallaActual = "biblioteca" },
-                                    icon = { Text("▤", fontSize = 24.sp) },
+                                    icon = {
+                                        Icon(
+                                            imageVector = Icons.Rounded.VideoLibrary,
+                                            contentDescription = "Biblioteca"
+                                        )
+                                    },
                                     label = { Text("Biblioteca") },
                                     colors = coloresPro
                                 )
                                 NavigationBarItem(
                                     selected = pantallaActual == "favoritos",
                                     onClick = { pantallaActual = "favoritos" },
-                                    icon = { Text("🤍", fontSize = 24.sp) },
+                                    icon = {
+                                        Icon(
+                                            imageVector = Icons.Rounded.FavoriteBorder,
+                                            contentDescription = "Favoritos"
+                                        )
+                                    },
                                     label = { Text("Favoritos") },
                                     colors = coloresPro
                                 )
                                 NavigationBarItem(
                                     selected = pantallaActual == "perfil",
                                     onClick = { pantallaActual = "perfil" },
-                                    icon = { Text("♙", fontSize = 24.sp) },
+                                    icon = {
+                                        Icon(
+                                            imageVector = Icons.Rounded.Person,
+                                            contentDescription = "Perfil"
+                                        )
+                                    },
                                     label = { Text("Perfil") },
                                     colors = coloresPro
                                 )

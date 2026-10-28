@@ -16,6 +16,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -60,7 +62,6 @@ fun RegistroScreen(
         if (uri != null) viewModel.procesarYGuardarFoto(context, uri)
     }
 
-    // DISEÑO UI/UX PREMIUM PARA LOS CAMPOS DE TEXTO
     val coloresTexto = OutlinedTextFieldDefaults.colors(
         focusedTextColor = Color(0xFF18372B),
         unfocusedTextColor = Color(0xFF302D28),
@@ -77,7 +78,11 @@ fun RegistroScreen(
 
     Scaffold(containerColor = Color(0xFFFAF7F0)) { padding ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(horizontal = 24.dp, vertical = 32.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp, vertical = 32.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -96,12 +101,31 @@ fun RegistroScreen(
                 contentAlignment = Alignment.Center
             ) {
                 if (bitmap != null) {
-                    Image(bitmap = bitmap.asImageBitmap(), contentDescription = "Foto elegida", contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+                    Image(
+                        bitmap = bitmap.asImageBitmap(),
+                        contentDescription = "Foto elegida",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
                 } else {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("📸", fontSize = 32.sp)
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+
+                        Icon(
+                            imageVector = Icons.Rounded.PhotoCamera,
+                            contentDescription = "Subir foto",
+                            tint = Color(0xFF244D3B).copy(alpha = 0.5f),
+                            modifier = Modifier.size(36.dp)
+                        )
                         Spacer(modifier = Modifier.height(4.dp))
-                        Text("Subir Logo", fontSize = 12.sp, color = Color.Gray, fontWeight = FontWeight.Bold)
+                        Text(
+                            text = "Subir Logo",
+                            fontSize = 12.sp,
+                            color = Color(0xFF6B6966),
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
             }

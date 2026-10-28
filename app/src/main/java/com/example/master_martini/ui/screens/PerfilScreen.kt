@@ -8,9 +8,16 @@ import android.provider.MediaStore
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ExitToApp
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.material.icons.rounded.AccountCircle
+import androidx.compose.material.icons.rounded.Call
+import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -22,6 +29,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -59,7 +67,7 @@ fun PerfilScreen(
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         Text(
-            text = "Mi Espacio",
+            text = "Mi Perfil",
             fontSize = 30.sp,
             fontWeight = FontWeight.ExtraBold,
             color = Color(0xFF244D3B)
@@ -71,23 +79,30 @@ fun PerfilScreen(
                 shape = RoundedCornerShape(20.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .shadow(6.dp, RoundedCornerShape(20.dp))
+                    .shadow(4.dp, RoundedCornerShape(20.dp))
             ) {
                 Column(
-                    modifier = Modifier.padding(24.dp),
+                    modifier = Modifier.padding(32.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    Text("👋", fontSize = 48.sp)
+                    Icon(
+                        imageVector = Icons.Rounded.AccountCircle,
+                        contentDescription = "Sin perfil",
+                        tint = Color(0xFFD9AD50).copy(alpha = 0.5f),
+                        modifier = Modifier.size(72.dp)
+                    )
                     Text(
-                        text = "Aún no tienes un perfil creado.",
+                        text = "Aún no has creado tu perfil",
                         fontSize = 16.sp,
-                        color = Color(0xFF6B6966)
+                        color = Color(0xFF6B6966),
+                        fontWeight = FontWeight.Medium
                     )
                     Button(
                         onClick = onIrARegistroClick,
                         modifier = Modifier
                             .fillMaxWidth()
+                            .padding(top = 8.dp)
                             .height(52.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD9AD50)),
                         shape = RoundedCornerShape(14.dp)
@@ -108,7 +123,7 @@ fun PerfilScreen(
                 shape = RoundedCornerShape(20.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .shadow(6.dp, RoundedCornerShape(20.dp))
+                    .shadow(4.dp, RoundedCornerShape(20.dp))
             ) {
                 Row(
                     modifier = Modifier.padding(20.dp),
@@ -116,7 +131,7 @@ fun PerfilScreen(
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(80.dp)
+                            .size(72.dp)
                             .clip(CircleShape)
                             .background(Color(0xFFF4F5F0))
                             .border(2.dp, Color(0xFFD9AD50), CircleShape),
@@ -130,7 +145,12 @@ fun PerfilScreen(
                                 modifier = Modifier.fillMaxSize()
                             )
                         } else {
-                            Text("👤", fontSize = 32.sp)
+                            Icon(
+                                imageVector = Icons.Rounded.Person,
+                                contentDescription = "Usuario",
+                                tint = Color(0xFF244D3B).copy(alpha = 0.6f),
+                                modifier = Modifier.size(36.dp)
+                            )
                         }
                     }
 
@@ -146,7 +166,7 @@ fun PerfilScreen(
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF18372B)
                         )
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(2.dp))
                         Text(
                             text = uiState.correo,
                             fontSize = 14.sp,
@@ -156,43 +176,98 @@ fun PerfilScreen(
                 }
             }
 
-            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Spacer(modifier = Modifier.weight(1f))
+
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(
-                    text = "Opciones",
-                    fontSize = 18.sp,
+                    text = "Ajustes y Soporte",
+                    fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF302D28),
-                    modifier = Modifier.padding(start = 4.dp, top = 8.dp)
+                    color = Color(0xFF6B6966),
+                    modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)
                 )
 
-                Button(
+                MenuOptionRow(
+                    icon = Icons.Rounded.Call,
+                    title = "Hablar con un asesor",
+                    iconColor = Color(0xFF244D3B),
+                    textColor = Color(0xFF18372B),
                     onClick = {
                         val intent = Intent(Intent.ACTION_DIAL).apply { data = Uri.parse("tel:+56912345678") }
                         context.startActivity(intent)
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF244D3B)),
-                    shape = RoundedCornerShape(14.dp)
-                ) {
-                    Text("📞 Hablar con un Asesor", fontSize = 16.sp, color = Color.White, fontWeight = FontWeight.SemiBold)
-                }
+                    }
+                )
 
-                OutlinedButton(
+                MenuOptionRow(
+                    icon = Icons.AutoMirrored.Rounded.ExitToApp,
+                    title = "Cerrar sesión",
+                    iconColor = Color(0xFFD32F2F),
+                    textColor = Color(0xFFD32F2F),
+                    showArrow = false,
                     onClick = {
                         viewModel.cerrarSesion(context)
                         onVolverClick()
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFD32F2F)),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFD32F2F)),
-                    shape = RoundedCornerShape(14.dp)
-                ) {
-                    Text("🚪 Cerrar Sesión", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun MenuOptionRow(
+    icon: ImageVector,
+    title: String,
+    iconColor: Color,
+    textColor: Color,
+    showArrow: Boolean = true,
+    onClick: () -> Unit
+) {
+    Surface(
+        color = Color.White,
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(2.dp, RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(16.dp))
+            .clickable(onClick = onClick)
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Surface(
+                shape = CircleShape,
+                color = iconColor.copy(alpha = 0.1f),
+                modifier = Modifier.size(40.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = title,
+                        tint = iconColor,
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Text(
+                text = title,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = textColor,
+                modifier = Modifier.weight(1f)
+            )
+
+            if (showArrow) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                    contentDescription = "Ir",
+                    tint = Color.LightGray,
+                    modifier = Modifier.size(24.dp)
+                )
             }
         }
     }

@@ -2,7 +2,10 @@ package com.example.master_martini.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -20,41 +23,55 @@ fun FavoritosScreen(onVolverClick: () -> Unit = {}) {
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFFAF7F0))
-            .padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(horizontal = 20.dp, vertical = 18.dp)
     ) {
         Text(
             text = "Mis Favoritos",
             fontSize = 30.sp,
             fontWeight = FontWeight.ExtraBold,
-            color = Color(0xFF244D3B),
-            modifier = Modifier.align(Alignment.Start)
+            color = Color(0xFF244D3B)
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.weight(1f))
 
         Surface(
             color = Color.White,
             shape = RoundedCornerShape(20.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .shadow(6.dp, RoundedCornerShape(20.dp))
+                .shadow(4.dp, RoundedCornerShape(20.dp))
         ) {
             Column(
                 modifier = Modifier.padding(32.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Text("🤍", fontSize = 56.sp)
+
+                Surface(
+                    shape = CircleShape,
+                    color = Color(0xFFFFEAEA),
+                    modifier = Modifier.size(72.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                        Icon(
+                            imageVector = Icons.Rounded.FavoriteBorder,
+                            contentDescription = "Sin favoritos",
+                            tint = Color(0xFFD32F2F), // Rojo elegante
+                            modifier = Modifier.size(36.dp)
+                        )
+                    }
+                }
+
                 Text(
                     text = "Aún no hay favoritos",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF18372B)
                 )
+
                 Text(
                     text = "Guarda tus recetas y técnicas de Master Martini para tenerlas siempre a mano.",
-                    fontSize = 15.sp,
+                    fontSize = 14.sp,
                     color = Color(0xFF6B6966),
                     textAlign = TextAlign.Center,
                     lineHeight = 22.sp
@@ -79,5 +96,7 @@ fun FavoritosScreen(onVolverClick: () -> Unit = {}) {
                 }
             }
         }
+
+        Spacer(modifier = Modifier.weight(1.5f))
     }
 }

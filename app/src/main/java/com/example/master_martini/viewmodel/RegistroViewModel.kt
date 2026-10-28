@@ -3,10 +3,14 @@ package com.example.master_martini.viewmodel
 import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.master_martini.data.AppDatabase
+import com.example.master_martini.data.UsuarioEntity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
 
@@ -25,27 +29,31 @@ class RegistroViewModel : ViewModel() {
     val uiState: StateFlow<RegistroUiState> = _uiState.asStateFlow()
 
     fun cargarDatosLocales(context: Context) {
-        val prefs = context.getSharedPreferences("MisDatos", Context.MODE_PRIVATE)
-        val nombreGuardado = prefs.getString("nombre", "") ?: ""
-        val correoGuardado = prefs.getString("correo", "") ?: ""
-        val uriGuardada = prefs.getString("fotoUri", "") ?: ""
-
-        _uiState.update {
-            it.copy(
-                nombre = nombreGuardado,
-                correo = correoGuardado,
-                fotoUri = if (uriGuardada.isNotEmpty()) Uri.parse(uriGuardada) else null
-            )
+        val dao = AppDatabase.getDatabase(context).usuarioDao()
+        viewModelScope.launch {
+            dao.obtenerUsuario().collect { usuario ->
+                if (usuario != null) {
+                    _uiState.update {
+                        it.copy(
+                            nombre = usuario.nombre,
+                            correo = usuario.correo,
+                            fotoUri = if (usuario.fotoUri.isNotEmpty()) Uri.parse(usuario.fotoUri) else null
+                        )
+                    }
+                }
+            }
         }
     }
 
     fun guardarDatosLocales(context: Context) {
-        val prefs = context.getSharedPreferences("MisDatos", Context.MODE_PRIVATE)
-        prefs.edit().apply {
-            putString("nombre", _uiState.value.nombre)
-            putString("correo", _uiState.value.correo)
-            putString("fotoUri", _uiState.value.fotoUri?.toString() ?: "")
-            apply()
+        val dao = AppDatabase.getDatabase(context).usuarioDao()
+        viewModelScope.launch {
+            val usuario = UsuarioEntity(
+                nombre = _uiState.value.nombre,
+                correo = _uiState.value.correo,
+                fotoUri = _uiState.value.fotoUri?.toString() ?: ""
+            )
+            dao.guardarUsuario(usuario)
         }
     }
 
@@ -63,14 +71,16 @@ class RegistroViewModel : ViewModel() {
             val uriLocal = Uri.fromFile(file)
             _uiState.update { it.copy(fotoUri = uriLocal) }
         } catch (e: Exception) {
-            _uiState.update { it.copy(fotoUri = uri) } // Respaldo
+            _uiState.update { it.copy(fotoUri = uri) }
         }
     }
 
     fun cerrarSesion(context: Context) {
-        val prefs = context.getSharedPreferences("MisDatos", Context.MODE_PRIVATE)
-        prefs.edit().clear().apply()
-        _uiState.update { RegistroUiState() } // Reinicia la pantalla a blanco
+        val dao = AppDatabase.getDatabase(context).usuarioDao()
+        viewModelScope.launch {
+            dao.eliminarUsuario()
+            _uiState.update { RegistroUiState() }
+        }
     }
 
     fun onNombreChange(nuevoNombre: String) {

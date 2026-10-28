@@ -45,7 +45,7 @@ private val MartiniText = Color(0xFF302D28)
 @Composable
 fun HomeScreen(
     nombreUsuario: String = "Emprendedor",
-    onBibliotecaClick: () -> Unit = {},
+    onBibliotecaClick: (String) -> Unit = {},
     onFavoritosClick: () -> Unit = {},
     onRegistroClick: () -> Unit = {},
     onPerfilClick: () -> Unit = {}
@@ -102,7 +102,7 @@ fun HomeScreen(
             Text(text = "Descubre recetas y aprende nuevas técnicas.", color = Color(0xFFE6EDE7), fontSize = 16.sp, lineHeight = 22.sp)
 
             Button(
-                onClick = onBibliotecaClick,
+                onClick = { onBibliotecaClick("Todas") },
                 colors = ButtonDefaults.buttonColors(containerColor = MartiniGold, contentColor = MartiniDarkGreen),
                 shape = RoundedCornerShape(14.dp),
                 modifier = Modifier.padding(top = 4.dp)
@@ -125,8 +125,8 @@ fun HomeScreen(
             Text(text = "Catálogo de Productos", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = MartiniText)
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                CategoryCard(imageRes = R.drawable.panaderia, title = "Panadería", modifier = Modifier.weight(1f), onClick = onBibliotecaClick)
-                CategoryCard(imageRes = R.drawable.pasteleria, title = "Pastelería", modifier = Modifier.weight(1f), onClick = onBibliotecaClick)
+                CategoryCard(imageRes = R.drawable.panaderia, title = "Panadería", modifier = Modifier.weight(1f), onClick = { onBibliotecaClick("Panadería") })
+                CategoryCard(imageRes = R.drawable.pasteleria, title = "Pastelería", modifier = Modifier.weight(1f), onClick = { onBibliotecaClick("Pastelería") })
             }
         }
 
@@ -134,8 +134,8 @@ fun HomeScreen(
             Text(text = "Cursos y Videos Técnicos", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = MartiniText)
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                CategoryCard(imageRes = R.drawable.chocolate, title = "Chocolatería", modifier = Modifier.weight(1f), onClick = onBibliotecaClick)
-                CategoryCard(imageRes = R.drawable.gelateria, title = "Gelatería", modifier = Modifier.weight(1f), onClick = onBibliotecaClick)
+                CategoryCard(imageRes = R.drawable.chocolate, title = "Chocolatería", modifier = Modifier.weight(1f), onClick = { onBibliotecaClick("Chocolatería") })
+                CategoryCard(imageRes = R.drawable.gelateria, title = "Gelatería", modifier = Modifier.weight(1f), onClick = { onBibliotecaClick("Gelatería") })
             }
         }
 

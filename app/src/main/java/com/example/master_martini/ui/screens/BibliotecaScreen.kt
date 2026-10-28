@@ -23,22 +23,35 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun BibliotecaScreen(onVolverClick: () -> Unit = {}) {
+fun BibliotecaScreen(
+    categoriaInicial: String = "Todas",
+    onVolverClick: () -> Unit = {}
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFFAF7F0))
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp, vertical = 18.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp)
+        verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-
-        Text(
-            text = "Academia Martini",
-            fontSize = 30.sp,
-            fontWeight = FontWeight.ExtraBold,
-            color = Color(0xFF244D3B)
-        )
+        Column {
+            Text(
+                text = "Academia Martini",
+                fontSize = 30.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = Color(0xFF244D3B)
+            )
+            if (categoriaInicial != "Todas") {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Categoría: $categoriaInicial",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFFD9AD50)
+                )
+            }
+        }
 
         VideoCardPro(
             titulo = "Técnicas de Temperado",
@@ -63,44 +76,44 @@ fun VideoCardPro(titulo: String, descripcion: String, duracion: String, nivel: S
         shape = RoundedCornerShape(20.dp),
         modifier = Modifier
             .fillMaxWidth()
+            .wrapContentHeight()
             .shadow(4.dp, RoundedCornerShape(20.dp))
             .clip(RoundedCornerShape(20.dp))
-            .clickable {  }
+            .clickable { }
     ) {
-        Column {
+        Column(modifier = Modifier.fillMaxWidth()) {
 
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(160.dp)
+                    .height(180.dp)
                     .background(Color(0xFF18372B)),
                 contentAlignment = Alignment.Center
             ) {
-
                 Surface(
                     shape = CircleShape,
                     color = Color(0xFFD9AD50).copy(alpha = 0.95f),
-                    modifier = Modifier.size(56.dp)
+                    modifier = Modifier.size(52.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                         Icon(
                             imageVector = Icons.Rounded.PlayArrow,
                             contentDescription = "Reproducir $titulo",
                             tint = Color.White,
-                            modifier = Modifier.size(32.dp)
+                            modifier = Modifier.size(30.dp)
                         )
                     }
                 }
             }
 
             Column(
-                modifier = Modifier.padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                modifier = Modifier.padding(18.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Text(
                     text = titulo,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
+                    fontSize = 18.sp,
                     color = Color(0xFF18372B)
                 )
 
@@ -111,8 +124,7 @@ fun VideoCardPro(titulo: String, descripcion: String, duracion: String, nivel: S
                     lineHeight = 20.sp
                 )
 
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Surface(
                         color = Color(0xFFF4F5F0),
                         shape = RoundedCornerShape(8.dp)

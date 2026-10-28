@@ -51,89 +51,149 @@ fun PerfilScreen(
         }
     }
 
-    Scaffold(containerColor = Color(0xFFFAF7F0)) { padding ->
-        Column(
-            modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 24.dp, vertical = 32.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text("Mi Espacio", fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF244D3B))
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFFAF7F0))
+            .padding(horizontal = 20.dp, vertical = 18.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp)
+    ) {
+        Text(
+            text = "Mi Espacio",
+            fontSize = 30.sp,
+            fontWeight = FontWeight.ExtraBold,
+            color = Color(0xFF244D3B)
+        )
 
-            if (uiState.nombre.isBlank()) {
-                Surface(
-                    color = Color.White,
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier.fillMaxWidth().shadow(4.dp, RoundedCornerShape(16.dp))
+        if (uiState.nombre.isBlank()) {
+            Surface(
+                color = Color.White,
+                shape = RoundedCornerShape(20.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .shadow(6.dp, RoundedCornerShape(20.dp))
+            ) {
+                Column(
+                    modifier = Modifier.padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    Column(modifier = Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        Text("👋", fontSize = 48.sp)
-                        Text("Aún no tienes un perfil creado.", fontSize = 16.sp, color = Color(0xFF6B6966))
-                        Button(
-                            onClick = onIrARegistroClick,
-                            modifier = Modifier.fillMaxWidth().height(52.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD9AD50)),
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Text("Unirse a la comunidad", fontSize = 16.sp, color = Color(0xFF18372B), fontWeight = FontWeight.Bold)
-                        }
-                    }
-                }
-            } else {
-
-                Surface(
-                    color = Color.White,
-                    shape = RoundedCornerShape(20.dp),
-                    modifier = Modifier.fillMaxWidth().shadow(6.dp, RoundedCornerShape(20.dp))
-                ) {
-                    Column(
-                        modifier = Modifier.padding(24.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    Text("👋", fontSize = 48.sp)
+                    Text(
+                        text = "Aún no tienes un perfil creado.",
+                        fontSize = 16.sp,
+                        color = Color(0xFF6B6966)
+                    )
+                    Button(
+                        onClick = onIrARegistroClick,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(52.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD9AD50)),
+                        shape = RoundedCornerShape(14.dp)
                     ) {
-                        Box(
-                            modifier = Modifier.size(110.dp).clip(CircleShape).background(Color(0xFFF4F5F0)).border(3.dp, Color(0xFFD9AD50), CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            if (bitmap != null) {
-                                Image(bitmap = bitmap.asImageBitmap(), contentDescription = "Foto elegida", contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
-                            } else {
-                                Text("👤", fontSize = 40.sp)
-                            }
-                        }
-
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(uiState.nombre, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color(0xFF18372B))
-                            Text(uiState.correo, fontSize = 15.sp, color = Color.Gray)
-                        }
+                        Text(
+                            text = "Unirse a la comunidad",
+                            fontSize = 16.sp,
+                            color = Color(0xFF18372B),
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
+            }
+        } else {
 
-                Spacer(modifier = Modifier.height(8.dp))
+            Surface(
+                color = Color.White,
+                shape = RoundedCornerShape(20.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .shadow(6.dp, RoundedCornerShape(20.dp))
+            ) {
+                Row(
+                    modifier = Modifier.padding(20.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(80.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFFF4F5F0))
+                            .border(2.dp, Color(0xFFD9AD50), CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (bitmap != null) {
+                            Image(
+                                bitmap = bitmap.asImageBitmap(),
+                                contentDescription = "Foto elegida",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        } else {
+                            Text("👤", fontSize = 32.sp)
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = uiState.nombre,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF18372B)
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = uiState.correo,
+                            fontSize = 14.sp,
+                            color = Color(0xFF6B6966)
+                        )
+                    }
+                }
+            }
+
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                Text(
+                    text = "Opciones",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF302D28),
+                    modifier = Modifier.padding(start = 4.dp, top = 8.dp)
+                )
 
                 Button(
                     onClick = {
                         val intent = Intent(Intent.ACTION_DIAL).apply { data = Uri.parse("tel:+56912345678") }
                         context.startActivity(intent)
                     },
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF244D3B)),
                     shape = RoundedCornerShape(14.dp)
-                ) { Text("📞 Hablar con un Asesor", fontSize = 16.sp, color = Color.White, fontWeight = FontWeight.SemiBold) }
+                ) {
+                    Text("📞 Hablar con un Asesor", fontSize = 16.sp, color = Color.White, fontWeight = FontWeight.SemiBold)
+                }
 
                 OutlinedButton(
                     onClick = {
                         viewModel.cerrarSesion(context)
                         onVolverClick()
                     },
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFD32F2F)),
                     border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFD32F2F)),
                     shape = RoundedCornerShape(14.dp)
-                ) { Text("🚪 Cerrar Sesión", fontSize = 16.sp, fontWeight = FontWeight.Bold) }
+                ) {
+                    Text("🚪 Cerrar Sesión", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                }
             }
-
-            Spacer(modifier = Modifier.weight(1f))
-            TextButton(onClick = onVolverClick) { Text("Volver al Inicio", fontSize = 16.sp, color = Color(0xFF6B6966), fontWeight = FontWeight.SemiBold) }
         }
     }
 }

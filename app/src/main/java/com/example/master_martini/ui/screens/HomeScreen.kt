@@ -40,6 +40,7 @@ private val MartiniText = Color(0xFF302D28)
 fun HomeScreen(
     nombreUsuario: String = "Emprendedor",
     onBibliotecaClick: () -> Unit = {},
+    onFavoritosClick: () -> Unit = {},
     onRegistroClick: () -> Unit = {},
     onPerfilClick: () -> Unit = {}
 ) {
@@ -50,93 +51,81 @@ fun HomeScreen(
         mostrarBanner = true
     }
 
-    Scaffold(
-        containerColor = MartiniCream,
-        bottomBar = {
-            NavigationBar(containerColor = Color.White, contentColor = MartiniGreen) {
-                NavigationBarItem(selected = true, onClick = {}, icon = { Text("⌂", fontSize = 24.sp) }, label = { Text("Inicio") })
-                NavigationBarItem(selected = false, onClick = onBibliotecaClick, icon = { Text("▤", fontSize = 24.sp) }, label = { Text("Biblioteca") })
-                NavigationBarItem(selected = false, onClick = {}, icon = { Text("♡", fontSize = 24.sp) }, label = { Text("Favoritos") })
-                NavigationBarItem(selected = false, onClick = onPerfilClick, icon = { Text("♙", fontSize = 24.sp) }, label = { Text("Perfil") })
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MartiniCream)
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 20.dp, vertical = 18.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp)
+    ) {
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(text = "MASTER MARTINI", fontSize = 26.sp, fontWeight = FontWeight.ExtraBold, color = MartiniGreen)
+                Text(text = "Hola, $nombreUsuario", fontSize = 18.sp, color = MartiniText)
+            }
+            Surface(shape = RoundedCornerShape(50), color = Color(0xFFE9EBDD)) {
+                Text(text = "\u2728", modifier = Modifier.padding(12.dp), color = MartiniGreen, fontSize = 24.sp)
             }
         }
-    ) { padding ->
+
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp, vertical = 18.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+                .fillMaxWidth()
+                .background(brush = Brush.linearGradient(listOf(MartiniGreen, MartiniDarkGreen)), shape = RoundedCornerShape(26.dp))
+                .padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(text = "MASTER MARTINI", fontSize = 26.sp, fontWeight = FontWeight.ExtraBold, color = MartiniGreen)
-                    Text(text = "Hola, $nombreUsuario", fontSize = 18.sp, color = MartiniText)
-                }
-                Surface(shape = RoundedCornerShape(50), color = Color(0xFFE9EBDD)) {
-                    Text(text = "\u2728", modifier = Modifier.padding(12.dp), color = MartiniGreen, fontSize = 24.sp)
-                }
+            Surface(color = MartiniGold, shape = RoundedCornerShape(50)) {
+                Text(text = "ESCUELA DE SABORES", modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp), color = MartiniDarkGreen, fontSize = 14.sp, fontWeight = FontWeight.Bold)
             }
+            Text(text = "Tu próxima creación comienza aquí", color = Color.White, fontSize = 28.sp, lineHeight = 34.sp, fontWeight = FontWeight.Bold)
+            Text(text = "Descubre recetas y aprende nuevas técnicas.", color = Color(0xFFE6EDE7), fontSize = 18.sp, lineHeight = 24.sp)
 
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(brush = Brush.linearGradient(listOf(MartiniGreen, MartiniDarkGreen)), shape = RoundedCornerShape(26.dp))
-                    .padding(24.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Surface(color = MartiniGold, shape = RoundedCornerShape(50)) {
-                    Text(text = "ESCUELA DE SABORES", modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp), color = MartiniDarkGreen, fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                }
-                Text(text = "Tu próxima creación comienza aquí", color = Color.White, fontSize = 28.sp, lineHeight = 34.sp, fontWeight = FontWeight.Bold)
-                Text(text = "Descubre recetas y aprende nuevas técnicas.", color = Color(0xFFE6EDE7), fontSize = 18.sp, lineHeight = 24.sp)
-
-                Button(onClick = onBibliotecaClick, colors = ButtonDefaults.buttonColors(containerColor = MartiniGold, contentColor = MartiniDarkGreen), shape = RoundedCornerShape(12.dp)) {
-                    Text(text = "Explorar recetas  →", fontSize = 16.sp, fontWeight = FontWeight.Bold)
-                }
+            Button(onClick = onBibliotecaClick, colors = ButtonDefaults.buttonColors(containerColor = MartiniGold, contentColor = MartiniDarkGreen), shape = RoundedCornerShape(12.dp)) {
+                Text(text = "Explorar recetas  →", fontSize = 16.sp, fontWeight = FontWeight.Bold)
             }
-
-            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Text(text = "Catálogo de Productos", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = MartiniText)
-
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    CategoryCard(imageRes = R.drawable.panaderia, title = "Panadería", modifier = Modifier.weight(1f), onClick = onBibliotecaClick)
-                    CategoryCard(imageRes = R.drawable.pasteleria, title = "Pastelería", modifier = Modifier.weight(1f), onClick = onBibliotecaClick)
-                }
-            }
-
-            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Text(text = "Cursos y Videos Técnicos", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = MartiniText)
-
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    CategoryCard(imageRes = R.drawable.chocolate, title = "Chocolatería", modifier = Modifier.weight(1f), onClick = onBibliotecaClick)
-                    CategoryCard(imageRes = R.drawable.gelateria, title = "Gelatería", modifier = Modifier.weight(1f), onClick = onBibliotecaClick)
-                }
-            }
-
-            AnimatedVisibility(
-                visible = mostrarBanner,
-                enter = slideInVertically(initialOffsetY = { it / 2 }) + fadeIn()
-            ) {
-                Card(
-                    modifier = Modifier.fillMaxWidth().clickable(onClick = onRegistroClick),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFE9EBDD)),
-                    shape = RoundedCornerShape(18.dp)
-                ) {
-                    Row(modifier = Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(text = "Personaliza tu experiencia", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = MartiniGreen)
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Text(text = "Selecciona tus intereses comerciales.", fontSize = 16.sp, color = MartiniText, lineHeight = 22.sp)
-                        }
-                        Text(text = "→", fontSize = 28.sp, color = MartiniGreen)
-                    }
-                }
-            }
-
-            Text(text = "Aprende · Crea · Inspírate", modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp), textAlign = TextAlign.Center, fontSize = 16.sp, color = MartiniGreen)
         }
+
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Text(text = "Catálogo de Productos", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = MartiniText)
+
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                CategoryCard(imageRes = R.drawable.panaderia, title = "Panadería", modifier = Modifier.weight(1f), onClick = onBibliotecaClick)
+                CategoryCard(imageRes = R.drawable.pasteleria, title = "Pastelería", modifier = Modifier.weight(1f), onClick = onBibliotecaClick)
+            }
+        }
+
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Text(text = "Cursos y Videos Técnicos", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = MartiniText)
+
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                CategoryCard(imageRes = R.drawable.chocolate, title = "Chocolatería", modifier = Modifier.weight(1f), onClick = onBibliotecaClick)
+                CategoryCard(imageRes = R.drawable.gelateria, title = "Gelatería", modifier = Modifier.weight(1f), onClick = onBibliotecaClick)
+            }
+        }
+
+        AnimatedVisibility(
+            visible = mostrarBanner,
+            enter = slideInVertically(initialOffsetY = { it / 2 }) + fadeIn()
+        ) {
+            Card(
+                modifier = Modifier.fillMaxWidth().clickable(onClick = onRegistroClick),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFE9EBDD)),
+                shape = RoundedCornerShape(18.dp)
+            ) {
+                Row(modifier = Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(text = "Personaliza tu experiencia", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = MartiniGreen)
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(text = "Selecciona tus intereses comerciales.", fontSize = 16.sp, color = MartiniText, lineHeight = 22.sp)
+                    }
+                    Text(text = "→", fontSize = 28.sp, color = MartiniGreen)
+                }
+            }
+        }
+
+        Text(text = "Aprende · Crea · Inspírate", modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp), textAlign = TextAlign.Center, fontSize = 16.sp, color = MartiniGreen)
     }
 }
 

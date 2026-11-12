@@ -7,18 +7,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.master_martini.data.AppDatabase
 import com.example.master_martini.data.UsuarioEntity
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 import java.security.MessageDigest
 import java.security.SecureRandom
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
-
 
 data class RegistroUiState(
     val usuarioId: Int? = null,
@@ -30,17 +31,23 @@ data class RegistroUiState(
     val errorNombre: Boolean = false,
     val errorCorreo: Boolean = false,
     val mensajeError: String = "",
-    val sesionActiva: Boolean = false
+    val sesionActiva: Boolean = false,
+    val recetasCompletadas: List<String> = emptyList()
 )
+
 class RegistroViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(RegistroUiState())
     val uiState: StateFlow<RegistroUiState> = _uiState.asStateFlow()
+
     private fun crearSalt(): ByteArray =
         ByteArray(16).also { SecureRandom().nextBytes(it) }
+
     private fun bytesHex(bytes: ByteArray): String =
         bytes.joinToString("") { "%02x".format(it) }
+
     private fun hexBytes(hex: String): ByteArray =
         hex.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
+
     private fun generarHash(
         contrasena: String,
         salt: ByteArray
@@ -52,8 +59,12 @@ class RegistroViewModel : ViewModel() {
             256
         )
         return try {
-            SecretKeyFactory
-                .getInstance("PBKDF2WithHmacSHA256")
+            val factory = try {
+                SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256")
+            } catch (e: Exception) {
+                SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1")
+            }
+            factory
                 .generateSecret(spec)
                 .encoded
                 .let(::bytesHex)
@@ -61,14 +72,48 @@ class RegistroViewModel : ViewModel() {
             spec.clearPassword()
         }
     }
+
     private fun correoValido(correo: String): Boolean {
         return Patterns.EMAIL_ADDRESS.matcher(correo).matches() &&
                 correo.count { it == '@' } == 1 &&
                 correo.endsWith("@gmail.com", ignoreCase = true)
     }
-    fun cargarDatosLocales(context: Context) {
-        cerrarSesion()
+
+    private fun claveProgreso(usuarioId: Int?): String =
+        "completadas_${usuarioId ?: 0}"
+
+    private fun leerProgreso(context: Context, usuarioId: Int?): List<String> {
+        val prefs = context.getSharedPreferences("master_martini_progreso", Context.MODE_PRIVATE)
+        val guardado = prefs.getString(claveProgreso(usuarioId), "") ?: ""
+        return if (guardado.isBlank()) emptyList() else guardado.split(";;;").filter { it.isNotBlank() }
     }
+
+    private fun guardarProgreso(context: Context, usuarioId: Int?, lista: List<String>) {
+        val prefs = context.getSharedPreferences("master_martini_progreso", Context.MODE_PRIVATE)
+        prefs.edit().putString(claveProgreso(usuarioId), lista.joinToString(";;;")).apply()
+    }
+
+    fun registrarRecetaCompletada(context: Context, tituloReceta: String) {
+        val usuarioActual = _uiState.value.usuarioId
+        val actuales = _uiState.value.recetasCompletadas
+        val actualizadas = if (actuales.contains(tituloReceta)) {
+            actuales
+        } else {
+            actuales + tituloReceta
+        }
+        guardarProgreso(context, usuarioActual, actualizadas)
+        _uiState.update {
+            it.copy(recetasCompletadas = actualizadas)
+        }
+    }
+
+    fun cargarDatosLocales(context: Context) {
+        val progresoInvitado = leerProgreso(context, null)
+        _uiState.update {
+            RegistroUiState(recetasCompletadas = progresoInvitado)
+        }
+    }
+
     fun registrarCuenta(
         context: Context,
         contrasena: String,
@@ -101,47 +146,55 @@ class RegistroViewModel : ViewModel() {
         }
         viewModelScope.launch {
             try {
-                val dao = AppDatabase
-                    .getDatabase(context)
-                    .usuarioDao()
-                if (dao.buscarPorCorreo(correo) != null) {
+                val idGuardado = withContext(Dispatchers.IO) {
+                    val dao = AppDatabase
+                        .getDatabase(context)
+                        .usuarioDao()
+                    if (dao.buscarPorCorreo(correo) != null) {
+                        return@withContext -1
+                    }
+                    val salt = crearSalt()
+                    val hash = generarHash(contrasena, salt)
+                    val usuario = UsuarioEntity(
+                        id = 0,
+                        nombre = nombre,
+                        correo = correo,
+                        fotoUri = estado.fotoUri?.toString() ?: "",
+                        passwordHash = hash,
+                        passwordSalt = bytesHex(salt)
+                    )
+                    dao.guardarUsuario(usuario).toInt()
+                }
+
+                if (idGuardado == -1) {
                     onResultado(
                         false,
                         "Ya existe una cuenta con ese correo. Inicia sesión."
                     )
                     return@launch
                 }
-                val salt = crearSalt()
-                val hash = generarHash(contrasena, salt)
-                val usuario = UsuarioEntity(
-                    id = 0,
-                    nombre = nombre,
-                    correo = correo,
-                    fotoUri = estado.fotoUri?.toString() ?: "",
-                    passwordHash = hash,
-                    passwordSalt = bytesHex(salt)
-                )
-                val idGuardado = dao.guardarUsuario(usuario).toInt()
+
+                val progresoUsuario = leerProgreso(context, idGuardado)
                 _uiState.update {
                     it.copy(
                         usuarioId = idGuardado,
                         nombre = nombre,
                         correo = correo,
-                        fotoUri = usuario.fotoUri
-                            .takeIf { uri -> uri.isNotBlank() }
-                            ?.let(Uri::parse),
+                        fotoUri = estado.fotoUri,
                         contrasena = "",
                         confirmarContrasena = "",
                         sesionActiva = true,
-                        mensajeError = ""
+                        mensajeError = "",
+                        recetasCompletadas = progresoUsuario
                     )
                 }
                 onResultado(true, "Cuenta creada correctamente.")
             } catch (e: Exception) {
-                onResultado(false, "No se pudo guardar la cuenta.")
+                onResultado(false, "No se pudo guardar: ${e.localizedMessage ?: "error de base de datos"}")
             }
         }
     }
+
     fun iniciarSesion(
         context: Context,
         correoIngresado: String,
@@ -159,10 +212,12 @@ class RegistroViewModel : ViewModel() {
         }
         viewModelScope.launch {
             try {
-                val dao = AppDatabase
-                    .getDatabase(context)
-                    .usuarioDao()
-                val usuario = dao.buscarPorCorreo(correo)
+                val usuario = withContext(Dispatchers.IO) {
+                    AppDatabase
+                        .getDatabase(context)
+                        .usuarioDao()
+                        .buscarPorCorreo(correo)
+                }
                 if (usuario == null) {
                     onResultado(
                         false,
@@ -192,6 +247,7 @@ class RegistroViewModel : ViewModel() {
                     onResultado(false, "La contraseña es incorrecta.")
                     return@launch
                 }
+                val progresoUsuario = leerProgreso(context, usuario.id)
                 _uiState.update {
                     it.copy(
                         usuarioId = usuario.id,
@@ -203,20 +259,23 @@ class RegistroViewModel : ViewModel() {
                         contrasena = "",
                         confirmarContrasena = "",
                         sesionActiva = true,
-                        mensajeError = ""
+                        mensajeError = "",
+                        recetasCompletadas = progresoUsuario
                     )
                 }
                 onResultado(true, "Sesión iniciada correctamente.")
             } catch (e: Exception) {
-                onResultado(false, "No se pudo iniciar sesión.")
+                onResultado(false, "No se pudo iniciar sesión: ${e.localizedMessage ?: "error de base de datos"}")
             }
         }
     }
+
     fun cerrarSesion() {
         _uiState.update {
             RegistroUiState()
         }
     }
+
     fun onNombreChange(nuevoNombre: String) {
         _uiState.update {
             it.copy(
@@ -226,6 +285,7 @@ class RegistroViewModel : ViewModel() {
             )
         }
     }
+
     fun onCorreoChange(nuevoCorreo: String) {
         _uiState.update {
             it.copy(
@@ -235,6 +295,7 @@ class RegistroViewModel : ViewModel() {
             )
         }
     }
+
     fun onContrasenaChange(valor: String) {
         _uiState.update {
             it.copy(
@@ -243,6 +304,7 @@ class RegistroViewModel : ViewModel() {
             )
         }
     }
+
     fun onConfirmarContrasenaChange(valor: String) {
         _uiState.update {
             it.copy(
@@ -251,6 +313,7 @@ class RegistroViewModel : ViewModel() {
             )
         }
     }
+
     fun procesarYGuardarFoto(
         context: Context,
         uri: Uri?
@@ -278,4 +341,3 @@ class RegistroViewModel : ViewModel() {
         }
     }
 }
-

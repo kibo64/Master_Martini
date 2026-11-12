@@ -1,31 +1,40 @@
 package com.example.master_martini.ui.screens
 
-import android.content.Intent
-import android.net.Uri
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.PlayArrow
-import androidx.compose.material.icons.rounded.School
+import androidx.compose.material.icons.rounded.Schedule
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.example.master_martini.data.AppDatabase
 import com.example.master_martini.data.FavoritoEntity
+import java.text.Normalizer
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 
@@ -33,403 +42,325 @@ private val MartiniGreen = Color(0xFF244D3B)
 private val MartiniDarkGreen = Color(0xFF18372B)
 private val MartiniGold = Color(0xFFD9AD50)
 private val MartiniCream = Color(0xFFFAF7F0)
+private val MartiniBorder = Color(0xFFE6E0D4)
 private val MartiniText = Color(0xFF302D28)
 
-data class VideoMartini(
-    val titulo: String,
-    val descripcion: String,
-    val duracion: String,
-    val nivel: String,
-    val url: String,
-    val categoria: String
-)
-private val videosMartini = listOf(
-    VideoMartini(
-        "Pudin de Chía | ORASI COCO",
-        "Preparación con productos ORASI COCO",
-        "",
-        "Técnico",
-        "https://www.youtube.com/watch?v=8n7kAGbS5uE",
-        "Chocolatería"
-    ),
-    VideoMartini(
-        "Mousse chocolate blanco | ARIBA",
-        "Preparación de mousse de chocolate blanco",
-        "",
-        "Técnico",
-        "https://www.youtube.com/watch?v=-8KFtkMyntY",
-        "Chocolatería"
-    ),
-    VideoMartini(
-        "Torta Chocolate Avellana | CARAVELLA DECO",
-        "Preparación de torta de chocolate y avellana",
-        "",
-        "Técnico",
-        "https://www.youtube.com/watch?v=ZwOkabO177M",
-        "Chocolatería"
-    ),
-    VideoMartini(
-        "Tarta de coco | ORASÍ COCO",
-        "Preparación de tarta de coco",
-        "",
-        "Técnico",
-        "https://www.youtube.com/watch?v=vmC2JpTvrLM",
-        "Pastelería"
-    ),
-    VideoMartini(
-        "¿Cómo utilizar crema pastelera, merengue o crema chantilly EN POLVO? | DELICE",
-        "Técnicas de preparación con productos DELICE",
-        "",
-        "Técnico",
-        "https://www.youtube.com/watch?v=1U1twaw6bP0",
-        "Pastelería"
-    ),
-    VideoMartini(
-        "Queque navideño | VITA BAKE",
-        "Preparación de queque navideño",
-        "",
-        "Técnico",
-        "https://www.youtube.com/watch?v=xoTHn4_-Fhs",
-        "Panadería"
-    ),
-    VideoMartini(
-        "Helado Artesanal Frutos del Bosque | GELATO MARTINI",
-        "Preparación de helado artesanal de frutos del bosque",
-        "",
-        "Técnico",
-        "https://www.youtube.com/watch?v=R2N_oOG0xI8",
-        "Gelatería"
-    ),
-    VideoMartini(
-        "Helado Artesanal de Avellana | BASE BLANCA MARTINI GELATO",
-        "Preparación de helado artesanal de avellana",
-        "",
-        "Técnico",
-        "https://www.youtube.com/watch?v=KhhA9pAJZxA",
-        "Gelatería"
-    ),
-    VideoMartini(
-        "Café helado | BASE VAINILLA PARA HELADOS | MARTINI GELATO",
-        "Preparación de café helado",
-        "",
-        "Técnico",
-        "https://www.youtube.com/watch?v=mGTlgfD_x5Y",
-        "Gelatería"
-    )
-)
+private fun normalizarTexto(texto: String): String {
+    val sinAcentos = Normalizer.normalize(texto, Normalizer.Form.NFD)
+        .replace("\\p{InCombiningDiacriticalMarks}+".toRegex(), "")
+    return sinAcentos.lowercase().trim()
+}
+
 @Composable
 fun BibliotecaScreen(
     categoriaInicial: String? = null,
     onVolverClick: () -> Unit = {},
     onFavoritosClick: () -> Unit = {},
+    onVideoClick: (VideoMartini) -> Unit = {},
     usuarioId: Int? = null,
     onNecesitaSesion: () -> Unit = {}
 ) {
     val context = LocalContext.current
-    val dao = remember {
-        AppDatabase.getDatabase(context).favoritoDao()
-    }
+    val dao = remember { AppDatabase.getDatabase(context).favoritoDao() }
     val scope = rememberCoroutineScope()
+
     val favoritosFlow = remember(dao, usuarioId) {
-        if (usuarioId != null) {
-            dao.obtenerFavoritos(usuarioId)
-        } else {
-            flowOf(emptyList<FavoritoEntity>())
-        }
+        if (usuarioId != null) dao.obtenerFavoritos(usuarioId) else flowOf(emptyList())
     }
     val favoritos by favoritosFlow.collectAsState(initial = emptyList())
-    var categoriaSeleccionada by remember(categoriaInicial) {
-        mutableStateOf(categoriaInicial)
-    }
-    var mensaje by remember { mutableStateOf<String?>(null) }
-    val snackbarHostState = remember { SnackbarHostState() }
-    LaunchedEffect(mensaje) {
-        mensaje?.let {
-            snackbarHostState.showSnackbar(it)
-            mensaje = null
-        }
-    }
-    val videosFiltrados = remember(categoriaSeleccionada) {
-        if (categoriaSeleccionada.isNullOrBlank()) {
+
+    var categoriaSeleccionada by remember(categoriaInicial) { mutableStateOf(categoriaInicial) }
+    var textoBusqueda by remember { mutableStateOf("") }
+
+    val videosFiltrados = remember(categoriaSeleccionada, textoBusqueda) {
+        val porCategoria = if (
+            categoriaSeleccionada.isNullOrBlank() ||
+            categoriaSeleccionada == "Todas" ||
+            categoriaSeleccionada == "Todos"
+        ) {
             videosMartini
         } else {
-            videosMartini.filter {
-                it.categoria.equals(
-                    categoriaSeleccionada,
-                    ignoreCase = true
-                )
-            }
+            videosMartini.filter { it.categoria.equals(categoriaSeleccionada, ignoreCase = true) }
         }
-    }
-    fun esFavorito(video: VideoMartini): Boolean {
-        return favoritos.any { it.titulo == video.titulo }
-    }
-    fun abrirVideo(video: VideoMartini) {
-        try {
-            val intent = Intent(
-                Intent.ACTION_VIEW,
-                Uri.parse(video.url)
-            )
-            context.startActivity(intent)
-        } catch (e: Exception) {
-            mensaje = "No se pudo abrir el video."
-        }
-    }
-    fun alternarFavorito(video: VideoMartini) {
-        val id = usuarioId
-        if (id == null) {
-            mensaje = "Inicia sesión para guardar tus favoritos."
-            return
-        }
-        scope.launch {
-            try {
-                if (esFavorito(video)) {
-                    dao.eliminarFavorito(
-                        titulo = video.titulo,
-                        usuarioId = id
-                    )
-                    mensaje = "Video eliminado de tus favoritos."
-                } else {
-                    dao.guardarFavorito(
-                        FavoritoEntity(
-                            titulo = video.titulo,
-                            descripcion = video.descripcion,
-                            duracion = video.duracion,
-                            nivel = video.nivel,
-                            url = video.url,
-                            categoria = video.categoria,
-                            usuarioId = id
-                        )
-                    )
-                    mensaje = "Video agregado a tus favoritos."
-                }
-            } catch (e: Exception) {
-                mensaje = "No se pudo actualizar el favorito."
-            }
-        }
-    }
-    Scaffold(
-        snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState)
-        },
-        containerColor = MartiniCream
-    ) { paddingValues ->
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .background(MartiniCream)
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(MartiniGreen)
-                    .padding(horizontal = 16.dp, vertical = 18.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = onVolverClick) {
-                    Icon(
-                        imageVector = Icons.Rounded.ArrowBack,
-                        contentDescription = "Volver",
-                        tint = Color.White
-                    )
-                }
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "Academia Martini",
-                        color = Color.White,
-                        fontSize = 23.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "Cursos y videos técnicos",
-                        color = MartiniCream,
-                        fontSize = 13.sp
-                    )
-                }
-                IconButton(onClick = onFavoritosClick) {
-                    Icon(
-                        imageVector = Icons.Rounded.Favorite,
-                        contentDescription = "Ver favoritos",
-                        tint = MartiniGold
-                    )
-                }
+        val consultaNormalizada = normalizarTexto(textoBusqueda)
+        if (consultaNormalizada.isBlank()) {
+            porCategoria
+        } else {
+            porCategoria.filter { video ->
+                normalizarTexto(video.titulo).contains(consultaNormalizada) ||
+                        normalizarTexto(video.descripcion).contains(consultaNormalizada) ||
+                        normalizarTexto(video.categoria).contains(consultaNormalizada) ||
+                        video.ingredientes.any { normalizarTexto(it).contains(consultaNormalizada) }
             }
-            Column(
-                modifier = Modifier.padding(
-                    start = 16.dp,
-                    end = 16.dp,
-                    top = 16.dp,
-                    bottom = 8.dp
-                )
-            ) {
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MartiniCream)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MartiniGreen)
+                .statusBarsPadding()
+                .padding(top = 18.dp, bottom = 18.dp, start = 12.dp, end = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onVolverClick, modifier = Modifier.size(40.dp)) {
+                Icon(Icons.Rounded.ArrowBack, "Volver", tint = Color.White)
+            }
+            Spacer(modifier = Modifier.width(6.dp))
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = categoriaSeleccionada ?: "Todos los cursos",
-                    color = MartiniText,
-                    fontSize = 21.sp,
+                    text = "Academia Martini",
+                    color = Color.White,
+                    fontSize = 23.sp,
                     fontWeight = FontWeight.Bold
                 )
-                Spacer(modifier = Modifier.height(12.dp))
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth()
+                Text(
+                    text = "Técnicas y preparaciones oficiales",
+                    color = MartiniCream.copy(alpha = 0.85f),
+                    fontSize = 13.sp
+                )
+            }
+            IconButton(
+                onClick = { if (usuarioId == null) onNecesitaSesion() else onFavoritosClick() },
+                modifier = Modifier
+                    .size(44.dp)
+                    .background(Color.White.copy(alpha = 0.12f), CircleShape)
+            ) {
+                Icon(Icons.Rounded.Favorite, "Ver favoritos", tint = MartiniGold)
+            }
+        }
+
+        OutlinedTextField(
+            value = textoBusqueda,
+            onValueChange = { textoBusqueda = it },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 16.dp, top = 14.dp),
+            placeholder = {
+                Text(
+                    text = "Buscar receta o marca (Ariba, Caravella, Orasí...)",
+                    fontSize = 13.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Rounded.Search,
+                    contentDescription = "Buscar",
+                    tint = MartiniGreen
+                )
+            },
+            trailingIcon = {
+                if (textoBusqueda.isNotBlank()) {
+                    IconButton(onClick = { textoBusqueda = "" }) {
+                        Icon(
+                            imageVector = Icons.Rounded.Close,
+                            contentDescription = "Limpiar búsqueda",
+                            tint = Color.Gray
+                        )
+                    }
+                }
+            },
+            singleLine = true,
+            shape = RoundedCornerShape(14.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = MartiniDarkGreen,
+                unfocusedTextColor = MartiniText,
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White,
+                focusedBorderColor = MartiniGreen,
+                unfocusedBorderColor = MartiniBorder,
+                cursorColor = MartiniGreen
+            )
+        )
+
+        val categorias = listOf("Todos", "Chocolatería", "Pastelería", "Panadería", "Gelatería")
+        LazyRow(
+            modifier = Modifier.fillMaxWidth(),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 14.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(categorias) { categoria ->
+                val esTodos = categoria == "Todos"
+                val seleccionada = if (esTodos) {
+                    categoriaSeleccionada == null || categoriaSeleccionada == "Todas" || categoriaSeleccionada == "Todos"
+                } else {
+                    categoriaSeleccionada == categoria
+                }
+
+                Surface(
+                    onClick = {
+                        categoriaSeleccionada = if (esTodos) "Todos" else categoria
+                    },
+                    shape = RoundedCornerShape(24.dp),
+                    color = if (seleccionada) MartiniDarkGreen else Color.White,
+                    border = if (!seleccionada) BorderStroke(1.dp, MartiniBorder) else null
                 ) {
-                    val categorias = listOf(
-                        "Todos",
-                        "Chocolatería",
-                        "Pastelería",
-                        "Panadería",
-                        "Gelatería"
+                    Text(
+                        text = categoria,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = if (seleccionada) Color.White else MartiniText,
+                        modifier = Modifier.padding(horizontal = 18.dp, vertical = 9.dp)
                     )
+                }
+            }
+        }
 
-                    categorias.forEach { categoria ->
-                        val seleccionada =
-                            if (categoria == "Todos") {
-                                categoriaSeleccionada == null
-                            } else {
-                                categoriaSeleccionada == categoria
-                            }
-
-                        Surface(
-                            modifier = Modifier
-                                .weight(1f)
-                                .clickable {
-                                    categoriaSeleccionada =
-                                        if (categoria == "Todos") {
-                                            null
-                                        } else {
-                                            categoria
-                                        }
-                                },
-                            shape = RoundedCornerShape(12.dp),
-                            color = if (seleccionada) {
-                                MartiniGreen
-                            } else {
-                                Color.White
-                            },
-                            shadowElevation = 2.dp
-                        ) {
-                            Box(
-                                modifier = Modifier.padding(
-                                    horizontal = 3.dp,
-                                    vertical = 10.dp
-                                ),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = when (categoria) {
-                                        "Chocolatería" -> "Chocolate"
-                                        else -> categoria
-                                    },
-                                    fontSize = 10.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = if (seleccionada) {
-                                        Color.White
-                                    } else {
-                                        MartiniText
-                                    },
-                                    maxLines = 1
-                                )
-                            }
+        if (videosFiltrados.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(28.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Surface(
+                        shape = CircleShape,
+                        color = MartiniGold.copy(alpha = 0.16f),
+                        border = BorderStroke(1.5.dp, MartiniGold.copy(alpha = 0.45f)),
+                        modifier = Modifier.size(96.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.Rounded.Search,
+                                contentDescription = null,
+                                tint = MartiniGold,
+                                modifier = Modifier.size(44.dp)
+                            )
                         }
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Sin recetas para \"$textoBusqueda\"",
+                        color = MartiniDarkGreen,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = "Prueba con otra marca o cambia la categoría seleccionada.",
+                        color = Color.Gray,
+                        fontSize = 13.sp,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Button(
+                        onClick = {
+                            textoBusqueda = ""
+                            categoriaSeleccionada = "Todos"
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MartiniGreen,
+                            contentColor = Color.White
+                        ),
+                        shape = RoundedCornerShape(12.dp),
+                        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
+                    ) {
+                        Text(
+                            text = "Mostrar todas las recetas",
+                            color = Color.White,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            textDecoration = TextDecoration.None
+                        )
                     }
                 }
             }
-            if (videosFiltrados.isEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(24.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("No hay videos en esta categoría.")
-                }
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(
-                        start = 16.dp,
-                        end = 16.dp,
-                        top = 8.dp,
-                        bottom = 24.dp
-                    ),
-                    verticalArrangement = Arrangement.spacedBy(14.dp)
-                ) {
-                    items(
-                        items = videosFiltrados,
-                        key = { it.titulo }
-                    ) { video ->
-                        VideoCardPro(
-                            video = video,
-                            guardado = esFavorito(video),
-                            onReproducir = { abrirVideo(video) },
-                            onFavoritoClick = {
-                                alternarFavorito(video)
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                items(videosFiltrados, key = { it.youtubeId }) { video ->
+                    val esFav = favoritos.any { it.titulo == video.titulo }
+                    VideoCardPremium(
+                        video = video,
+                        guardado = esFav,
+                        onReproducir = { onVideoClick(video) },
+                        onFavoritoClick = {
+                            if (usuarioId == null) {
+                                onNecesitaSesion()
+                            } else {
+                                scope.launch {
+                                    if (esFav) {
+                                        dao.eliminarFavorito(video.titulo, usuarioId)
+                                    } else {
+                                        dao.guardarFavorito(
+                                            FavoritoEntity(
+                                                titulo = video.titulo,
+                                                descripcion = video.descripcion,
+                                                duracion = video.duracion,
+                                                nivel = video.nivel,
+                                                url = video.url,
+                                                categoria = video.categoria,
+                                                usuarioId = usuarioId
+                                            )
+                                        )
+                                    }
+                                }
                             }
-                        )
-                    }
+                        }
+                    )
                 }
             }
         }
     }
 }
+
 @Composable
-fun VideoCardPro(
+fun VideoCardPremium(
     video: VideoMartini,
     guardado: Boolean,
     onReproducir: () -> Unit,
     onFavoritoClick: () -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onReproducir),
         shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color.White
-        ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 4.dp
-        )
+        border = BorderStroke(1.dp, MartiniBorder),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(145.dp)
-                    .background(MartiniDarkGreen)
-                    .clickable(onClick = onReproducir),
-                contentAlignment = Alignment.Center
+                    .height(190.dp)
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Surface(
-                        shape = RoundedCornerShape(50),
-                        color = MartiniGold,
-                        modifier = Modifier.size(54.dp)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(
-                                imageVector = Icons.Rounded.PlayArrow,
-                                contentDescription = "Reproducir video",
-                                tint = MartiniDarkGreen,
-                                modifier = Modifier.size(38.dp)
+                AsyncImage(
+                    model = video.thumbnailUrl,
+                    contentDescription = video.titulo,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.65f)),
+                                startY = 90f
                             )
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(10.dp))
-                    Text(
-                        text = "VER VIDEO EN YOUTUBE",
-                        color = Color.White,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.sp
-                    )
-                }
+                        )
+                )
+
                 Surface(
                     modifier = Modifier
-                        .align(Alignment.TopStart)
-                        .padding(12.dp),
+                        .padding(12.dp)
+                        .align(Alignment.TopStart),
                     shape = RoundedCornerShape(8.dp),
                     color = MartiniGold
                 ) {
@@ -438,73 +369,85 @@ fun VideoCardPro(
                         color = MartiniDarkGreen,
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(
-                            horizontal = 9.dp,
-                            vertical = 6.dp
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+                    )
+                }
+
+                Surface(
+                    modifier = Modifier
+                        .padding(12.dp)
+                        .align(Alignment.BottomEnd),
+                    shape = RoundedCornerShape(8.dp),
+                    color = Color.Black.copy(alpha = 0.7f)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Schedule,
+                            contentDescription = null,
+                            tint = MartiniGold,
+                            modifier = Modifier.size(13.dp)
                         )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = video.duracion,
+                            color = Color.White,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
+
+                Surface(
+                    shape = CircleShape,
+                    color = Color.White.copy(alpha = 0.92f),
+                    modifier = Modifier
+                        .size(54.dp)
+                        .align(Alignment.Center)
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.PlayArrow,
+                        contentDescription = "Reproducir",
+                        tint = MartiniDarkGreen,
+                        modifier = Modifier
+                            .padding(11.dp)
+                            .fillMaxSize()
                     )
                 }
             }
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(14.dp),
+                    .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = video.titulo,
                         color = MartiniText,
-                        fontSize = 15.sp,
+                        fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
-                        maxLines = 3,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Text(
-                        text = video.descripcion,
-                        color = Color.Gray,
-                        fontSize = 12.sp,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Rounded.School,
-                            contentDescription = null,
-                            tint = MartiniGreen,
-                            modifier = Modifier.size(15.dp)
-                        )
-                        Spacer(modifier = Modifier.width(5.dp))
-                        Text(
-                            text = video.nivel,
-                            color = MartiniGreen,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = video.descripcion,
+                        color = Color.Gray,
+                        fontSize = 13.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
-                Spacer(modifier = Modifier.width(8.dp))
-
                 IconButton(onClick = onFavoritoClick) {
                     Icon(
-                        imageVector = if (guardado) {
-                            Icons.Rounded.Favorite
-                        } else {
-                            Icons.Rounded.FavoriteBorder
-                        },
-                        contentDescription = if (guardado) {
-                            "Quitar de favoritos"
-                        } else {
-                            "Agregar a favoritos"
-                        },
-                        tint = if (guardado) {
-                            Color(0xFFD94848)
-                        } else {
-                            MartiniGreen
-                        },
-                        modifier = Modifier.size(27.dp)
+                        imageVector = if (guardado) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
+                        contentDescription = "Favorito",
+                        tint = if (guardado) Color(0xFFD94848) else Color.LightGray,
+                        modifier = Modifier.size(28.dp)
                     )
                 }
             }

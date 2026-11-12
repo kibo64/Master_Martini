@@ -6,6 +6,7 @@ import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -29,18 +30,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.master_martini.R
 import com.example.master_martini.viewmodel.RegistroViewModel
 
 private val RegistroGreen = Color(0xFF244D3B)
 private val RegistroDarkGreen = Color(0xFF18372B)
 private val RegistroGold = Color(0xFFD9AD50)
 private val RegistroCream = Color(0xFFFAF7F0)
+private val RegistroBorder = Color(0xFFE6E0D4)
 private val RegistroText = Color(0xFF302D28)
 
 @Composable
@@ -89,7 +93,7 @@ fun RegistroScreen(
         focusedContainerColor = Color.White,
         unfocusedContainerColor = Color.White,
         focusedBorderColor = RegistroGreen,
-        unfocusedBorderColor = Color.LightGray,
+        unfocusedBorderColor = RegistroBorder,
         focusedLabelColor = RegistroGreen,
         unfocusedLabelColor = Color.Gray,
         cursorColor = RegistroGreen,
@@ -97,41 +101,57 @@ fun RegistroScreen(
         errorLabelColor = Color.Red
     )
     Scaffold(
+        contentWindowInsets = WindowInsets(0.dp),
         containerColor = RegistroCream
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
+                .statusBarsPadding()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(18.dp),
+                .padding(horizontal = 24.dp, vertical = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Surface(
+                shape = CircleShape,
+                color = Color.White,
+                border = BorderStroke(2.dp, RegistroGold),
+                shadowElevation = 3.dp,
+                modifier = Modifier.size(62.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.logo),
+                    contentDescription = "Master Martini",
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.padding(11.dp)
+                )
+            }
             Text(
                 text = "MASTER MARTINI",
-                fontSize = 14.sp,
+                fontSize = 13.sp,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 3.sp,
                 color = RegistroGold
             )
             Text(
                 text = "Crea tu cuenta",
-                fontSize = 29.sp,
+                fontSize = 28.sp,
                 fontWeight = FontWeight.ExtraBold,
-                color = RegistroGreen
+                color = RegistroDarkGreen
             )
             Text(
-                text = "Únete a nuestra comunidad",
-                fontSize = 15.sp,
+                text = "Únete a nuestra comunidad de emprendedores",
+                fontSize = 14.sp,
                 color = Color(0xFF6B6966)
             )
             Box(
                 modifier = Modifier
-                    .size(118.dp)
+                    .size(108.dp)
                     .clip(CircleShape)
                     .background(Color.White)
-                    .border(3.dp, RegistroGold, CircleShape)
+                    .border(2.5.dp, RegistroGold, CircleShape)
                     .clickable {
                         galeriaLauncher.launch(
                             PickVisualMediaRequest(
@@ -156,7 +176,7 @@ fun RegistroScreen(
                             imageVector = Icons.Rounded.PhotoCamera,
                             contentDescription = "Seleccionar foto",
                             tint = RegistroGreen,
-                            modifier = Modifier.size(34.dp)
+                            modifier = Modifier.size(30.dp)
                         )
                         Text(
                             text = "Foto opcional",
@@ -307,7 +327,7 @@ fun RegistroScreen(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp),
+                    .height(54.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = RegistroGreen
                 ),

@@ -1,9 +1,14 @@
 package com.example.master_martini.ui.screens
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Lock
@@ -15,17 +20,22 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.master_martini.R
 
 private val LoginGreen = Color(0xFF244D3B)
 private val LoginDarkGreen = Color(0xFF18372B)
 private val LoginGold = Color(0xFFD9AD50)
 private val LoginCream = Color(0xFFFAF7F0)
+private val LoginBorder = Color(0xFFE6E0D4)
+private val LoginText = Color(0xFF302D28)
 
 @Composable
 fun LoginScreen(
@@ -42,11 +52,30 @@ fun LoginScreen(
     var mostrarContrasena by remember { mutableStateOf(false) }
     var mensajeError by remember { mutableStateOf("") }
     var cargando by remember { mutableStateOf(false) }
+
+    val coloresTexto = OutlinedTextFieldDefaults.colors(
+        focusedTextColor = LoginDarkGreen,
+        unfocusedTextColor = LoginText,
+        focusedContainerColor = Color.White,
+        unfocusedContainerColor = Color.White,
+        focusedBorderColor = LoginGreen,
+        unfocusedBorderColor = LoginBorder,
+        focusedLabelColor = LoginGreen,
+        unfocusedLabelColor = Color.Gray,
+        focusedLeadingIconColor = LoginGreen,
+        unfocusedLeadingIconColor = Color.Gray,
+        focusedTrailingIconColor = LoginGreen,
+        unfocusedTrailingIconColor = Color.Gray,
+        cursorColor = LoginGreen
+    )
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(LoginCream)
-            .padding(horizontal = 24.dp, vertical = 20.dp),
+            .statusBarsPadding()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 24.dp, vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(
@@ -60,30 +89,45 @@ fun LoginScreen(
                     tint = LoginGreen
                 )
             }
-            Text("Volver", color = LoginGreen, fontSize = 16.sp)
+            Text("Volver", color = LoginGreen, fontSize = 16.sp, fontWeight = FontWeight.Medium)
         }
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(16.dp))
+        Surface(
+            shape = CircleShape,
+            color = Color.White,
+            border = BorderStroke(2.dp, LoginGold),
+            shadowElevation = 4.dp,
+            modifier = Modifier.size(78.dp)
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.logo),
+                contentDescription = "Master Martini",
+                contentScale = ContentScale.Fit,
+                modifier = Modifier.padding(14.dp)
+            )
+        }
+        Spacer(modifier = Modifier.height(14.dp))
         Text(
             "MASTER MARTINI",
             color = LoginGold,
-            fontSize = 14.sp,
+            fontSize = 13.sp,
             fontWeight = FontWeight.Bold,
             letterSpacing = 3.sp
         )
-        Spacer(modifier = Modifier.height(14.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         Text(
             "¡Qué bueno verte!",
             color = LoginDarkGreen,
             fontSize = 28.sp,
             fontWeight = FontWeight.ExtraBold
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(6.dp))
         Text(
             "Inicia sesión para continuar",
             color = Color.Gray,
             fontSize = 15.sp
         )
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(28.dp))
         OutlinedTextField(
             value = correo,
             onValueChange = {
@@ -100,11 +144,7 @@ fun LoginScreen(
                 keyboardType = KeyboardType.Email
             ),
             shape = RoundedCornerShape(14.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = LoginGreen,
-                focusedLabelColor = LoginGreen,
-                cursorColor = LoginGreen
-            )
+            colors = coloresTexto
         )
         Spacer(modifier = Modifier.height(16.dp))
         OutlinedTextField(
@@ -144,19 +184,22 @@ fun LoginScreen(
                 keyboardType = KeyboardType.Password
             ),
             shape = RoundedCornerShape(14.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = LoginGreen,
-                focusedLabelColor = LoginGreen,
-                cursorColor = LoginGreen
-            )
+            colors = coloresTexto
         )
         if (mensajeError.isNotBlank()) {
             Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = mensajeError,
-                color = Color(0xFFD32F2F),
-                fontSize = 13.sp
-            )
+            Surface(
+                color = Color(0xFFFFEAEA),
+                shape = RoundedCornerShape(10.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = mensajeError,
+                    color = Color(0xFFD32F2F),
+                    fontSize = 13.sp,
+                    modifier = Modifier.padding(12.dp)
+                )
+            }
         }
         Spacer(modifier = Modifier.height(24.dp))
         Button(
@@ -199,8 +242,8 @@ fun LoginScreen(
             )
         }
         Spacer(modifier = Modifier.height(18.dp))
-        HorizontalDivider(color = Color(0xFFE4DFD5))
-        Spacer(modifier = Modifier.height(18.dp))
+        HorizontalDivider(color = LoginBorder)
+        Spacer(modifier = Modifier.height(16.dp))
         Text(
             "¿Todavía no tienes una cuenta?",
             color = Color.Gray,
@@ -214,7 +257,7 @@ fun LoginScreen(
                 fontSize = 16.sp
             )
         }
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(16.dp))
         Text(
             "Tu experiencia, al estilo Martini.",
             color = LoginGold,

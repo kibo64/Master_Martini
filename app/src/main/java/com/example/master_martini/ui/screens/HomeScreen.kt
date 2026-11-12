@@ -3,17 +3,16 @@ package com.example.master_martini.ui.screens
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
-import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -40,17 +39,21 @@ private val MartiniGreen = Color(0xFF244D3B)
 private val MartiniDarkGreen = Color(0xFF18372B)
 private val MartiniGold = Color(0xFFD9AD50)
 private val MartiniCream = Color(0xFFFAF7F0)
+private val MartiniBorder = Color(0xFFE6E0D4)
 private val MartiniText = Color(0xFF302D28)
 
 @Composable
 fun HomeScreen(
     nombreUsuario: String = "Emprendedor",
+    sesionActiva: Boolean = false,
+    onRecetaDestacadaClick: (String) -> Unit = {},
     onBibliotecaClick: (String) -> Unit = {},
     onFavoritosClick: () -> Unit = {},
     onRegistroClick: () -> Unit = {},
     onPerfilClick: () -> Unit = {}
 ) {
     var mostrarBanner by remember { mutableStateOf(false) }
+    val nombreMostrado = nombreUsuario.trim().ifBlank { "Emprendedor" }
 
     LaunchedEffect(Unit) {
         delay(300)
@@ -61,29 +64,43 @@ fun HomeScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MartiniCream)
+            .statusBarsPadding()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp, vertical = 18.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp)
+        verticalArrangement = Arrangement.spacedBy(22.dp)
     ) {
-
-        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = "MASTER MARTINI", fontSize = 26.sp, fontWeight = FontWeight.ExtraBold, color = MartiniGreen)
-                Text(text = "Hola, $nombreUsuario", fontSize = 18.sp, color = MartiniText)
+                Text(
+                    text = "Hola, $nombreMostrado",
+                    fontSize = 26.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = MartiniGreen
+                )
+                Text(
+                    text = "Bienvenido a tu asistente de taller",
+                    fontSize = 15.sp,
+                    color = MartiniText.copy(alpha = 0.7f),
+                    modifier = Modifier.padding(top = 4.dp)
+                )
             }
+
             Surface(
-                shape = CircleShape,
-                color = Color(0xFFE9EBDD),
-                modifier = Modifier.size(48.dp)
+                shape = RoundedCornerShape(14.dp),
+                color = Color.White,
+                border = BorderStroke(1.dp, MartiniBorder),
+                shadowElevation = 2.dp,
+                modifier = Modifier.size(56.dp)
             ) {
-                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                    Icon(
-                        imageVector = Icons.Rounded.AutoAwesome,
-                        contentDescription = "Premium",
-                        tint = MartiniGreen,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
+                Image(
+                    painter = painterResource(id = R.drawable.logo),
+                    contentDescription = "Marca Master Martini",
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.padding(6.dp)
+                )
             }
         }
 
@@ -91,19 +108,43 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .shadow(8.dp, RoundedCornerShape(26.dp))
-                .background(brush = Brush.linearGradient(listOf(MartiniGreen, MartiniDarkGreen)), shape = RoundedCornerShape(26.dp))
+                .background(
+                    brush = Brush.linearGradient(listOf(MartiniGreen, MartiniDarkGreen)),
+                    shape = RoundedCornerShape(26.dp)
+                )
                 .padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             Surface(color = MartiniGold, shape = RoundedCornerShape(50)) {
-                Text(text = "ESCUELA DE SABORES", modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp), color = MartiniDarkGreen, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold)
+                Text(
+                    text = "RECETA DESTACADA",
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp),
+                    color = MartiniDarkGreen,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = 0.8.sp
+                )
             }
-            Text(text = "Tu próxima creación comienza aquí", color = Color.White, fontSize = 28.sp, lineHeight = 34.sp, fontWeight = FontWeight.Bold)
-            Text(text = "Descubre recetas y aprende nuevas técnicas.", color = Color(0xFFE6EDE7), fontSize = 16.sp, lineHeight = 22.sp)
+            Text(
+                text = "Torta Chocolate Avellana",
+                color = Color.White,
+                fontSize = 26.sp,
+                lineHeight = 32.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = "Domina el baño espejo con Caravella Deco y relleno cremoso de avellana.",
+                color = Color(0xFFE6EDE7),
+                fontSize = 15.sp,
+                lineHeight = 22.sp
+            )
 
             Button(
-                onClick = { onBibliotecaClick("Todas") },
-                colors = ButtonDefaults.buttonColors(containerColor = MartiniGold, contentColor = MartiniDarkGreen),
+                onClick = { onRecetaDestacadaClick("ZwOkabO177M") },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MartiniGold,
+                    contentColor = MartiniDarkGreen
+                ),
                 shape = RoundedCornerShape(14.dp),
                 modifier = Modifier.padding(top = 4.dp)
             ) {
@@ -111,28 +152,56 @@ fun HomeScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text(text = "Explorar recetas", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "Ver paso a paso", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                     Icon(
                         imageVector = Icons.AutoMirrored.Rounded.ArrowForward,
-                        contentDescription = "Ir a recetas",
+                        contentDescription = "Ir a receta",
                         modifier = Modifier.size(18.dp)
                     )
                 }
             }
         }
 
-        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            Text(text = "Cursos y Videos Técnicos", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = MartiniText)
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                CategoryCard(imageRes = R.drawable.panaderia, title = "Panadería", modifier = Modifier.weight(1f), onClick = { onBibliotecaClick("Panadería") })
-                CategoryCard(imageRes = R.drawable.pasteleria, title = "Pastelería", modifier = Modifier.weight(1f), onClick = { onBibliotecaClick("Pastelería") })
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text(
+                text = "Tu espacio de trabajo",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = MartiniDarkGreen
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                CategoryCard(
+                    imageRes = R.drawable.panaderia,
+                    title = "Panadería",
+                    modifier = Modifier.weight(1f),
+                    onClick = { onBibliotecaClick("Panadería") }
+                )
+                CategoryCard(
+                    imageRes = R.drawable.pasteleria,
+                    title = "Pastelería",
+                    modifier = Modifier.weight(1f),
+                    onClick = { onBibliotecaClick("Pastelería") }
+                )
             }
-        }
-
-        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                CategoryCard(imageRes = R.drawable.chocolate, title = "Chocolatería", modifier = Modifier.weight(1f), onClick = { onBibliotecaClick("Chocolatería") })
-                CategoryCard(imageRes = R.drawable.gelateria, title = "Gelatería", modifier = Modifier.weight(1f), onClick = { onBibliotecaClick("Gelatería") })
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                CategoryCard(
+                    imageRes = R.drawable.chocolate,
+                    title = "Chocolatería",
+                    modifier = Modifier.weight(1f),
+                    onClick = { onBibliotecaClick("Chocolatería") }
+                )
+                CategoryCard(
+                    imageRes = R.drawable.gelateria,
+                    title = "Gelatería",
+                    modifier = Modifier.weight(1f),
+                    onClick = { onBibliotecaClick("Gelatería") }
+                )
             }
         }
 
@@ -143,16 +212,31 @@ fun HomeScreen(
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .shadow(4.dp, RoundedCornerShape(18.dp))
                     .clip(RoundedCornerShape(18.dp))
-                    .clickable(onClick = onRegistroClick),
-                color = Color(0xFFE9EBDD)
+                    .clickable(onClick = if (sesionActiva) onPerfilClick else onRegistroClick),
+                shape = RoundedCornerShape(18.dp),
+                border = BorderStroke(1.dp, MartiniBorder),
+                color = Color(0xFFE9EBDD),
+                shadowElevation = 2.dp
             ) {
-                Row(modifier = Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    modifier = Modifier.padding(20.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text(text = "Personaliza tu experiencia", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = MartiniGreen)
+                        Text(
+                            text = if (sesionActiva) "Tu progreso en Academia Martini" else "Filtraremos según tu rubro",
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MartiniGreen
+                        )
                         Spacer(modifier = Modifier.height(4.dp))
-                        Text(text = "Selecciona tus intereses comerciales.", fontSize = 15.sp, color = MartiniText, lineHeight = 20.sp)
+                        Text(
+                            text = if (sesionActiva) "Revisa tus talleres certificados y tu rango técnico." else "Cuéntanos qué preparas y te mostraremos solo lo que necesitas.",
+                            fontSize = 14.sp,
+                            color = MartiniText,
+                            lineHeight = 20.sp
+                        )
                     }
                     Icon(
                         imageVector = Icons.AutoMirrored.Rounded.ArrowForward,
@@ -164,20 +248,35 @@ fun HomeScreen(
             }
         }
 
-        Text(text = "Aprende · Crea · Inspírate", modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp, top = 8.dp),
-            textAlign = TextAlign.Center, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = MartiniGreen.copy(alpha = 0.7f))
+        Text(
+            text = "Aprende · Produce · Crece",
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 12.dp, top = 4.dp),
+            textAlign = TextAlign.Center,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = MartiniGreen.copy(alpha = 0.7f)
+        )
     }
 }
 
 @Composable
-private fun CategoryCard(imageRes: Int, title: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
+private fun CategoryCard(
+    imageRes: Int,
+    title: String,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
     Surface(
         modifier = modifier
-            .height(160.dp)
-            .shadow(4.dp, RoundedCornerShape(18.dp))
+            .height(158.dp)
             .clip(RoundedCornerShape(18.dp))
             .clickable(onClick = onClick),
-        color = Color.White
+        shape = RoundedCornerShape(18.dp),
+        border = BorderStroke(1.dp, MartiniBorder),
+        color = Color.White,
+        shadowElevation = 3.dp
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             Image(
@@ -189,7 +288,11 @@ private fun CategoryCard(imageRes: Int, title: String, modifier: Modifier = Modi
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Brush.verticalGradient(colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.85f))))
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.85f))
+                        )
+                    )
             )
             Text(
                 text = title,

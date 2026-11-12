@@ -18,9 +18,11 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 abstract class AppDatabase : RoomDatabase() {
     abstract fun usuarioDao(): UsuarioDao
     abstract fun favoritoDao(): FavoritoDao
+
     companion object {
         @Volatile
         private var INSTANCE: AppDatabase? = null
+
         private val MIGRATION_2_3 = object : Migration(2, 3) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL(
@@ -31,6 +33,7 @@ abstract class AppDatabase : RoomDatabase() {
                 )
             }
         }
+
         private val MIGRATION_3_4 = object : Migration(3, 4) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL(
@@ -59,6 +62,7 @@ abstract class AppDatabase : RoomDatabase() {
                 )
             }
         }
+
         private val MIGRATION_4_5 = object : Migration(4, 5) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL(
@@ -89,21 +93,23 @@ abstract class AppDatabase : RoomDatabase() {
                 )
             }
         }
-    fun getDatabase(context: Context): AppDatabase =
-        INSTANCE ?: synchronized(this) {
-            val instance = Room.databaseBuilder(
-                context.applicationContext,
-                AppDatabase::class.java,
-                "master_martini_db"
-            )
-                .addMigrations(
-                    MIGRATION_2_3,
-                    MIGRATION_3_4,
-                    MIGRATION_4_5
+
+        fun getDatabase(context: Context): AppDatabase =
+            INSTANCE ?: synchronized(this) {
+                val instance = Room.databaseBuilder(
+                    context.applicationContext,
+                    AppDatabase::class.java,
+                    "master_martini_db"
                 )
-                .build()
-            INSTANCE = instance
-            instance
-        }
+                    .addMigrations(
+                        MIGRATION_2_3,
+                        MIGRATION_3_4,
+                        MIGRATION_4_5
+                    )
+                    .fallbackToDestructiveMigration()
+                    .build()
+                INSTANCE = instance
+                instance
+            }
     }
 }
